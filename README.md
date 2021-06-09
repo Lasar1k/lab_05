@@ -22,7 +22,7 @@ add_library(lib2 Transaction.h Transaction.cpp)
 add_executable(testst test.cpp)
 target_compile_options(testst PRIVATE --coverage)
 target_link_libraries(testst PRIVATE --coverage gtest gtest_main)
-add_test( testst runUnitTests )
+add_test( testst testst )
 ```
 ## .travis.yml
 ```
@@ -45,7 +45,7 @@ before_install:
 script:
 - cmake .
 - make
-- ./runUnitTests
+- ./testst
 
 after_success:
   - coveralls --root . -E ".*gtest.*" -E ".*CMakeFiles.*"
@@ -139,3 +139,12 @@ TEST(Transaction, test8)
 	Transaction B;
 	Account A1(1, 1000);
 ```
+В процессе тестирования выяснилось, что код нерабочий. В нём были ошибки, из-за которых гугл-тесты не работали. Например, в исходном коде было написано это:
+```
+bool success = Debit(to, sum + fee_);
+```
+А нужно так:
+```
+ bool success = Debit(from, sum + fee_);
+```
+После исправления кода, трэвис собрался, все тесты прошли и всё заработало
