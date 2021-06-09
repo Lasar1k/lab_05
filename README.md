@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/Rogopl/lab_05.svg?branch=main)](https://travis-ci.com/Rogopl/lab_05)
+[![Build Status](https://travis-ci.com/Rogopl/lab_05.svg?branch=master)](https://travis-ci.com/Rogopl/lab_05)
 Создайте CMakeList.txt для библиотеки banking.
 Создайте модульные тесты на классы Transaction и Account.
     Используйте mock-объекты.
