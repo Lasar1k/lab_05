@@ -4,10 +4,14 @@
 Создайте CMakeList.txt для библиотеки banking.
 
 Создайте модульные тесты на классы Transaction и Account.
+
     Используйте mock-объекты.
     Покрытие кода должно составлять 100%.
+    
 Настройте сборочную процедуру на TravisCI.
+
 Настройте Coveralls.io.
+
 ## CMakeLists.txt
 ```
 cmake_minimum_required(VERSION 3.2)
