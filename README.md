@@ -1,160 +1,141 @@
-## Laboratory work V
-
-Данная лабораторная работа посвещена изучению фреймворков для тестирования на примере **GTest**
-
-```sh
-$ open https://github.com/google/googletest
+Создайте CMakeList.txt для библиотеки banking.
+Создайте модульные тесты на классы Transaction и Account.
+    Используйте mock-объекты.
+    Покрытие кода должно составлять 100%.
+Настройте сборочную процедуру на TravisCI.
+Настройте Coveralls.io.
+## CMakeLists.txt
 ```
+cmake_minimum_required(VERSION 3.2)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-## Tasks
+project(bank)
+SET(COVERAGE OFF CACHE BOOL "Coverage")
+enable_testing()
+add_subdirectory(third-party/gtest)
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-- [ ] 1. Создать публичный репозиторий с названием **lab05** на сервисе **GitHub**
-- [ ] 2. Выполнить инструкцию учебного материала
-- [ ] 3. Ознакомиться со ссылками учебного материала
-- [ ] 4. Составить отчет и отправить ссылку личным сообщением в **Slack**
 
-## Tutorial
-
-```sh
-$ export GITHUB_USERNAME=<имя_пользователя>
-$ alias gsed=sed # for *-nix system
+add_library(lib1 Account.h Account.cpp)
+add_library(lib2 Transaction.h Transaction.cpp)
+add_executable(testst test.cpp)
+target_compile_options(testst PRIVATE --coverage)
+target_link_libraries(testst PRIVATE --coverage gtest gtest_main)
+add_test( testst runUnitTests )
 ```
-
-```sh
-$ cd ${GITHUB_USERNAME}/workspace
-$ pushd .
-$ source scripts/activate
+## .travis.yml
 ```
+language: cpp
 
-```sh
-$ git clone https://github.com/${GITHUB_USERNAME}/lab04 projects/lab05
-$ cd projects/lab05
-$ git remote remove origin
-$ git remote add origin https://github.com/${GITHUB_USERNAME}/lab05
+
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake
+      - cmake-data
+      - mingw-w64
+
+before_install:
+  - pip install --user cpp-coveralls
+
+
+script:
+- cmake .
+- make
+- ./runUnitTests
+
+after_success:
+  - coveralls --root . -E ".*gtest.*" -E ".*CMakeFiles.*"
 ```
-
-```sh
-$ mkdir third-party
-$ git submodule add https://github.com/google/googletest third-party/gtest
-$ cd third-party/gtest && git checkout release-1.8.1 && cd ../..
-$ git add third-party/gtest
-$ git commit -m"added gtest framework"
+## test.cpp
 ```
-
-```sh
-$ gsed -i '/option(BUILD_EXAMPLES "Build examples" OFF)/a\
-option(BUILD_TESTS "Build tests" OFF)
-' CMakeLists.txt
-$ cat >> CMakeLists.txt <<EOF
-
-if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(third-party/gtest)
-  file(GLOB \${PROJECT_NAME}_TEST_SOURCES tests/*.cpp)
-  add_executable(check \${\${PROJECT_NAME}_TEST_SOURCES})
-  target_link_libraries(check \${PROJECT_NAME} gtest_main)
-  add_test(NAME check COMMAND check)
-endif()
-EOF
-```
-
-```sh
-$ mkdir tests
-$ cat > tests/test1.cpp <<EOF
-#include <print.hpp>
-
-#include <gtest/gtest.h>
-
-TEST(Print, InFileStream)
+#include "Account.cpp"
+#include "Transaction.cpp"
+#include "gtest/gtest.h"
+TEST(Account, test1)
 {
-  std::string filepath = "file.txt";
-  std::string text = "hello";
-  std::ofstream out{filepath};
-
-  print(text, out);
-  out.close();
-
-  std::string result;
-  std::ifstream in{filepath};
-  in >> result;
-
-  EXPECT_EQ(result, text);
+	Account A(1, 3);
+	EXPECT_ANY_THROW(A.ChangeBalance(14));
 }
-EOF
-```
-
-```sh
-$ cmake -H. -B_build -DBUILD_TESTS=ON
-$ cmake --build _build
-$ cmake --build _build --target test
-```
-
-```sh
-$ _build/check
-$ cmake --build _build --target test -- ARGS=--verbose
-```
-
-```sh
-$ gsed -i 's/lab04/lab05/g' README.md
-$ gsed -i 's/\(DCMAKE_INSTALL_PREFIX=_install\)/\1 -DBUILD_TESTS=ON/' .travis.yml
-$ gsed -i '/cmake --build _build --target install/a\
-- cmake --build _build --target test -- ARGS=--verbose
-' .travis.yml
-```
-
-```sh
-$ travis lint
-```
-
-```sh
-$ git add .travis.yml
-$ git add tests
-$ git add -p
-$ git commit -m"added tests"
-$ git push origin master
-```
-
-```sh
-$ travis login --auto
-$ travis enable
-```
-
-```sh
-$ mkdir artifacts
-$ sleep 20s && gnome-screenshot --file artifacts/screenshot.png
-# for macOS: $ screencapture -T 20 artifacts/screenshot.png
-# open https://github.com/${GITHUB_USERNAME}/lab05
-```
-
-## Report
-
-```sh
-$ popd
-$ export LAB_NUMBER=05
-$ git clone https://github.com/tp-labs/lab${LAB_NUMBER} tasks/lab${LAB_NUMBER}
-$ mkdir reports/lab${LAB_NUMBER}
-$ cp tasks/lab${LAB_NUMBER}/README.md reports/lab${LAB_NUMBER}/REPORT.md
-$ cd reports/lab${LAB_NUMBER}
-$ edit REPORT.md
-$ gist REPORT.md
-```
-
-## Homework
-
-### Задание
-1. Создайте `CMakeList.txt` для библиотеки *banking*.
-2. Создайте модульные тесты на классы `Transaction` и `Account`.
-    * Используйте mock-объекты.
-    * Покрытие кода должно составлять 100%.
-3. Настройте сборочную процедуру на **TravisCI**.
-4. Настройте [Coveralls.io](https://coveralls.io/).
-
-## Links
-
-- [C++ CI: Travis, CMake, GTest, Coveralls & Appveyor](http://david-grs.github.io/cpp-clang-travis-cmake-gtest-coveralls-appveyor/)
-- [Boost.Tests](http://www.boost.org/doc/libs/1_63_0/libs/test/doc/html/)
-- [Catch](https://github.com/catchorg/Catch2)
-
-```
-Copyright (c) 2015-2021 The ISC Authors
+TEST(Account, test2)
+{
+	Account A(1, 3);
+	A.Lock();
+	A.ChangeBalance(1);
+	EXPECT_EQ(A.GetBalance(), 4);
+}
+TEST(Account, test3)
+{
+	Account A(1, 3);
+	EXPECT_ANY_THROW(A.ChangeBalance(10));
+}
+TEST(Account, test4)
+{
+	Account A(1, 3);
+	EXPECT_EQ(A.GetBalance(), 3);
+}
+TEST(Account, test5)
+{
+	Account A(1, 3);
+	A.Lock();
+	EXPECT_ANY_THROW(A.Lock());
+}
+TEST(Transaction, test1)
+{
+	Transaction B;
+	EXPECT_EQ(B.fee(), 1);
+}
+TEST(Transaction, test2)
+{
+	Transaction B;
+	B.set_fee(3);
+	EXPECT_EQ(B.fee(), 3);
+}
+TEST(Transaction, test3)
+{
+	Transaction B;
+	Account A1(1, 1000);
+	Account A2(2, 500);
+	B.set_fee(100);
+	B.Make(A1, A2, 300);
+	EXPECT_EQ(A1.GetBalance(), 600);
+	EXPECT_EQ(A2.GetBalance(), 800);
+}
+TEST(Transaction, test4)
+{
+	Transaction B;
+	Account A1(1, 1000);
+	Account A2(2, 500);
+	B.set_fee(137);
+	EXPECT_FALSE(B.Make(A1, A2, 273));
+}
+TEST(Transaction, test5)
+{
+	Transaction B;
+	Account A1(1, 1000);
+	Account A2(2, 500);
+	EXPECT_FALSE(B.Make(A1, A2, 2000));
+}
+TEST(Transaction, test6)
+{
+	Transaction B;
+	Account A1(1, 1000);
+	Account A2(2, 500);
+	EXPECT_ANY_THROW(B.Make(A1, A2, -19));
+}
+TEST(Transaction, test7)
+{
+	Transaction B;
+	Account A1(1, 1000);
+	Account A2(2, 500);
+	EXPECT_ANY_THROW(B.Make(A1, A2, -1));
+	EXPECT_ANY_THROW(B.Make(A1, A2, 10));
+}
+TEST(Transaction, test8)
+{
+	Transaction B;
+	Account A1(1, 1000);
 ```
