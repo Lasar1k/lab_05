@@ -17,7 +17,7 @@ before_install:
 script:
 - cmake .
 - make
-- ./runUnitTests
+- ./testst
 
 after_success:
   - coveralls --root . -E ".*gtest.*" -E ".*CMakeFiles.*"
