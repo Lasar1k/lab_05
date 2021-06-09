@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.com/Rogopl/lab_05.svg?branch=master)](https://travis-ci.com/Rogopl/lab_05)
+[![Coverage Status](https://coveralls.io/repos/github/Rogopl/lab_05/badge.svg?branch=master)](https://coveralls.io/github/Rogopl/lab_05?branch=master)
+
 Создайте CMakeList.txt для библиотеки banking.
+
 Создайте модульные тесты на классы Transaction и Account.
     Используйте mock-объекты.
     Покрытие кода должно составлять 100%.
